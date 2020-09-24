@@ -8,6 +8,10 @@
 3. Place the dll named "VRCVideoLibrary.dll" into your MelonLoader mods folder.
 4. Done!
 
+## Credits
+- DubyaDude: [Button Api](https://github.com/DubyaDude/RubyButtonAPI)
+- knah: [UiExpansionKit](https://github.com/knah/VRCMods)
+
 ## Adding Videos
 1. Go into the "UHModz" directory that should have been created in your "VRChat" directory after your first launch.
 2. In the "UHModz" directory there should be a text file called "Videos.txt", open that with a text editor.
