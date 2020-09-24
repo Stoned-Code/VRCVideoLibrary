@@ -342,7 +342,7 @@ namespace VideoLibrary
                         videoPlayer.Clear();
                         videoPlayer.AddURL(VideoLink);
 
-                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds for video to play");
+                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
 
                         yield return new WaitForSeconds(30);
 
