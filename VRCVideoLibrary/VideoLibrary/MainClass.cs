@@ -103,81 +103,6 @@ namespace VideoLibrary
                 OpenVideoLibrary();
             }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
 
-            LoadLibrary();
-        }
-
-        public void InitializeLibrary()
-        {
-            string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
-
-            var rootDirectory = Application.dataPath;
-            rootDirectory += @"\..\";
-
-            var subDirectory = rootDirectory + @"\UHModz\";
-
-            videoDirectory = subDirectory + "Videos.txt";
-
-            if (!Directory.Exists(subDirectory))
-            {
-                Directory.CreateDirectory(subDirectory);
-                MelonLogger.Log("Created UHModz Directory!");
-            }
-
-            if (!File.Exists(videoDirectory))
-            {
-                using (StreamWriter sw = File.CreateText(videoDirectory))
-                {
-                    sw.WriteLine(exampleVideo);
-                    sw.Close();
-                }
-            }
-
-            GetVideoLibrary();
-        }
-
-        public void GetVideoLibrary()
-        {
-            indexNumber = 0;
-            currentMenuIndex = 0;
-
-            string line;
-            StreamReader file = new StreamReader(videoDirectory);
-
-            while ((line = file.ReadLine()) != null)
-            {
-                var lineArray = line.Split('|');
-                videoList.Add(new ModVideo { VideoName = lineArray[0], VideoLink = lineArray[1] });
-            }
-
-            file.Close();
-
-            videoList.Sort();
-
-            var videoNumber = 0;
-
-            for (int i = 0; i < videoList.Count; i++)
-            {
-                var video = videoList[i];
-
-                video.VideoNumber = videoNumber;
-                video.IndexNumber = indexNumber;
-
-                videoNumber++;
-                if (videoNumber == 9 && i != (videoList.Count - 1))
-                {
-                    indexNumber++;
-                    videoNumber = 0;
-                }
-
-                else
-                {
-                    continue;
-                }
-            }
-        }
-
-        public void LoadLibrary()
-        {
             foreach (ModVideo video in videoList)
             {
                 if (video.VideoNumber == 0)
@@ -325,6 +250,76 @@ namespace VideoLibrary
             {
                 previousButton.setIntractable(false);
                 nextButton.setIntractable(false);
+            }
+        }
+
+        public void InitializeLibrary()
+        {
+            string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
+
+            var rootDirectory = Application.dataPath;
+            rootDirectory += @"\..\";
+
+            var subDirectory = rootDirectory + @"\UHModz\";
+
+            videoDirectory = subDirectory + "Videos.txt";
+
+            if (!Directory.Exists(subDirectory))
+            {
+                Directory.CreateDirectory(subDirectory);
+                MelonLogger.Log("Created UHModz Directory!");
+            }
+
+            if (!File.Exists(videoDirectory))
+            {
+                using (StreamWriter sw = File.CreateText(videoDirectory))
+                {
+                    sw.WriteLine(exampleVideo);
+                    sw.Close();
+                }
+            }
+
+            GetVideoLibrary();
+        }
+
+        public void GetVideoLibrary()
+        {
+            indexNumber = 0;
+            currentMenuIndex = 0;
+            StreamReader file = new StreamReader(videoDirectory);
+
+
+            string line;
+            while ((line = file.ReadLine()) != null)
+            {
+                var lineArray = line.Split('|');
+                videoList.Add(new ModVideo { VideoName = lineArray[0], VideoLink = lineArray[1] });
+            }
+
+            file.Close();
+
+            videoList.Sort();
+
+            var videoNumber = 0;
+
+            for (int i = 0; i < videoList.Count; i++)
+            {
+                var video = videoList[i];
+
+                video.VideoNumber = videoNumber;
+                video.IndexNumber = indexNumber;
+
+                videoNumber++;
+                if (videoNumber == 9 && i != (videoList.Count - 1))
+                {
+                    indexNumber++;
+                    videoNumber = 0;
+                }
+
+                else
+                {
+                    continue;
+                }
             }
         }
 

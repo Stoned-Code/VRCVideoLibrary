@@ -5,3 +5,4 @@ VRCVideoLibrary/VideoLibrary/RubyButtonAPI.cs
 *.dll
 VRCVideoLibrary/VideoLibrary/bin/Debug/VRCVideoLibrary.pdb
 BigTextExample.png
+ModID.txt
