@@ -10,9 +10,9 @@
 ## Adding Videos
 1. Go into the "UHModz" directory that should have been created after your first launch.
 2. In the "UHModz" directory there should be a text file called "Videos.txt", open that with a text editor.
-3. Format your videos like this, `Button Name|Video Url`. Example below.
-![Image of Yaktocat](https://cdn.discordapp.com/attachments/735644395436638219/758484334507589652/TextExample.png)
-![Image of Yaktocat](https://cdn.discordapp.com/attachments/735644395436638219/758484331273912370/MenuExample.png)
+3. Format your text document like so and save, `Button Name|Video Url`. Example below. (Must restart VRChat if it's open)
+![Text Example](https://cdn.discordapp.com/attachments/735644395436638219/758484334507589652/TextExample.png)
+![Menu Example](https://cdn.discordapp.com/attachments/735644395436638219/758484331273912370/MenuExample.png)
 
 ## Keep On Adding Video Links
-![Image of Yaktocat](https://i.gyazo.com/6dededa4bbf694bb48d53ca42f92cc89.png)
+![Multiple Videos Example](https://i.gyazo.com/6dededa4bbf694bb48d53ca42f92cc89.png)
