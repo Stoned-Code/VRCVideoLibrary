@@ -3,6 +3,7 @@ using RubyButtonAPI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,12 @@ namespace VideoLibrary
         private int currentMenuIndex;
         private bool onCooldown = false;
 
+        private string videoDirectory;
+
         private QMNestedButton videoLibrary;
+
+        private QMSingleButton previousButton;
+        private QMSingleButton nextButton;
 
         public override void OnApplicationStart()
         {
@@ -48,7 +54,7 @@ namespace VideoLibrary
             indexButton.getGameObject().GetComponentInChildren<Button>().enabled = false;
             indexButton.getGameObject().GetComponentInChildren<Image>().enabled = false;
 
-            var previousButton = new QMSingleButton(videoLibrary, 4, 0, "Previous\nPage", delegate
+            previousButton = new QMSingleButton(videoLibrary, 4, 0, "Previous\nPage", delegate
             {
                 if (currentMenuIndex != 0)
                 {
@@ -70,7 +76,7 @@ namespace VideoLibrary
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
 
-            var nextButton = new QMSingleButton(videoLibrary, 4, 2, "Next\nPage", delegate
+            nextButton = new QMSingleButton(videoLibrary, 4, 2, "Next\nPage", delegate
             {
                 if (currentMenuIndex != indexNumber)
                 {
@@ -92,155 +98,12 @@ namespace VideoLibrary
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
 
-            if (videoList.Count <= 9)
+            var openListButton = new QMSingleButton(videoLibrary, 5, -1, "Open\nVideo\nList", delegate
             {
-                previousButton.setIntractable(false);
-                nextButton.setIntractable(false);
-            }
+                OpenVideoLibrary();
+            }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
 
-            foreach (ModVideo video in videoList)
-            {
-                if (video.VideoNumber == 0)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 1)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 2)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 3)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 4)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 5)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 6)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 7)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 8)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
-                    {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
-                        {
-                            MelonCoroutines.Start(CoolDown());
-                        }
-                    }, "Puts " + video.VideoName + " on the video player", null, null);
-
-                    video.VideoButton = vidButton;
-                }
-
-                if (video.IndexNumber != currentMenuIndex)
-                {
-                    video.VideoButton.setActive(false);
-                }
-            }
-
+            LoadLibrary();
         }
 
         public void InitializeLibrary()
@@ -252,7 +115,7 @@ namespace VideoLibrary
 
             var subDirectory = rootDirectory + @"\UHModz\";
 
-            var videoDirectory = subDirectory + "Videos.txt";
+            videoDirectory = subDirectory + "Videos.txt";
 
             if (!Directory.Exists(subDirectory))
             {
@@ -268,6 +131,14 @@ namespace VideoLibrary
                     sw.Close();
                 }
             }
+
+            GetVideoLibrary();
+        }
+
+        public void GetVideoLibrary()
+        {
+            indexNumber = 0;
+            currentMenuIndex = 0;
 
             string line;
             StreamReader file = new StreamReader(videoDirectory);
@@ -305,6 +176,163 @@ namespace VideoLibrary
             }
         }
 
+        public void LoadLibrary()
+        {
+            foreach (ModVideo video in videoList)
+            {
+                if (video.VideoNumber == 0)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null); //"Puts " + video.VideoName + " on the video player"
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 1)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 2)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 3)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 4)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 5)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 6)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 7)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                else if (video.VideoNumber == 8)
+                {
+                    var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
+                    {
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
+                    }, $"Puts {video.VideoName} on the video player", null, null);
+
+                    video.VideoButton = vidButton;
+                }
+
+                if (video.IndexNumber != currentMenuIndex)
+                {
+                    video.VideoButton.setActive(false);
+                }
+            }
+
+            if (videoList.Count <= 9)
+            {
+                previousButton.setIntractable(false);
+                nextButton.setIntractable(false);
+            }
+        }
+
+        public void OpenVideoLibrary()
+        {
+            Process.Start(videoDirectory);
+        }
+
         public IEnumerator CoolDown()
         {
             onCooldown = true;
@@ -324,6 +352,11 @@ namespace VideoLibrary
         public int CompareTo(ModVideo other)
         {
             return this.VideoName.CompareTo(other.VideoName);
+        }
+
+        public void DestroyButton()
+        {
+            VideoButton.DestroyMe();
         }
 
         public IEnumerator AddVideo(bool onCooldown)
