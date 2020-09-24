@@ -2,3 +2,5 @@
 MenuExample.png
 TextExample.png
 VRCVideoLibrary/VideoLibrary/RubyButtonAPI.cs
+*.dll
+VRCVideoLibrary/VideoLibrary/bin/Debug/VRCVideoLibrary.pdb
