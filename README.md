@@ -5,7 +5,8 @@
  ## How to Use
 1. Download and install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader).
 2. Place the dll named "VRCVideoLibrary.dll" into your MelonLoader mods folder.
-3. Done!
+3. Download and install [UIExpansionKit](https://github.com/knah/VRCMods).
+4. Done!
 
 ## Adding Videos
 1. Go into the "UHModz" directory that should have been created in your "VRChat" directory after your first launch.
