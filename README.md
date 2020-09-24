@@ -16,4 +16,4 @@
 ![Menu Example](https://cdn.discordapp.com/attachments/735644395436638219/758484331273912370/MenuExample.png)
 
 ## Keep On Adding Video Links
-![Multiple Videos Example](https://i.gyazo.com/6dededa4bbf694bb48d53ca42f92cc89.png)
+![Multiple Videos Example](https://cdn.discordapp.com/attachments/735644395436638219/758691645415096320/Big_Example.png)
