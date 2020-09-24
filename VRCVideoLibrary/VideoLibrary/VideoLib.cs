@@ -18,7 +18,7 @@ using VRCSDK2;
 
 namespace VideoLibrary
 {
-    public class MainClass : MelonMod
+    public class VideoLib : MelonMod
     {
         protected List<ModVideo> videoList;
  
