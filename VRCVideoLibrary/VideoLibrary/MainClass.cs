@@ -17,12 +17,13 @@ using VRCSDK2;
 
 namespace VideoLibrary
 {
-    public class VideoLib : MelonMod
+    public class MainClass : MelonMod
     {
         protected List<ModVideo> videoList;
  
         private int indexNumber = 0;
         private int currentMenuIndex;
+        private bool onCooldown = false;
 
         private QMNestedButton videoLibrary;
 
@@ -103,7 +104,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -113,7 +119,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -123,7 +134,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -133,7 +149,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -143,7 +164,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -153,7 +179,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -163,7 +194,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -173,7 +209,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -183,7 +224,12 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo());
+                        MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                        if (!onCooldown)
+                        {
+                            MelonCoroutines.Start(CoolDown());
+                        }
                     }, "Puts " + video.VideoName + " on the video player", null, null);
 
                     video.VideoButton = vidButton;
@@ -257,20 +303,119 @@ namespace VideoLibrary
                     continue;
                 }
             }
+        }
 
-            //foreach (ModVideo video in videoList)
-            //{
-            //    video.VideoNumber = videoNumber;
-            //    video.IndexNumber = indexNumber;
+        public IEnumerator CoolDown()
+        {
+            onCooldown = true;
+            yield return new WaitForSeconds(30);
+            onCooldown = false;
+        }
+    }
 
-            //    videoNumber++;
+    public class ModVideo : IComparable<ModVideo>
+    {
+        public string VideoName { get; set; }
+        public string VideoLink { get; set; }
+        public int VideoNumber { get; set; }
+        public int IndexNumber { get; set; }
+        public QMSingleButton VideoButton { get; set; }
 
-            //    if (videoNumber == 9)
-            //    {
-            //        videoNumber = 0;
-            //        indexNumber++;
-            //    }
-            //}
+        public int CompareTo(ModVideo other)
+        {
+            return this.VideoName.CompareTo(other.VideoName);
+        }
+
+        public IEnumerator AddVideo(bool onCooldown)
+        {
+            var videoPlayerActive = VideoPlayerCheck();
+            var isMaster = MasterCheck(APIUser.CurrentUser.id);
+
+            if (videoPlayerActive)
+            {
+                if (isMaster)
+                {
+                    if (!onCooldown)
+                    {
+                        var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+
+                        videoPlayer.Clear();
+                        videoPlayer.AddURL(VideoLink);
+
+                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds for video to play");
+
+                        yield return new WaitForSeconds(30);
+
+                        videoPlayer.Next();
+                    }
+
+                    else
+                    {
+                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Video Library is on 30 second cooldown");
+                    }
+                }
+
+                else
+                {
+                    VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master can set videos...");
+                }
+            }
+        }
+
+        private static bool MasterCheck(string UserID)
+        {
+            bool isMaster = false;
+            var playerList = PlayerManager.field_Private_Static_PlayerManager_0.field_Private_List_1_Player_0;
+
+            foreach (Player player in playerList)
+            {
+                var playerApi = player.prop_VRCPlayerApi_0;
+                var apiUser = player.field_Private_APIUser_0;
+
+                if (playerApi.isMaster)
+                {
+                    if (apiUser.id == UserID)
+                    {
+                        isMaster = true;
+                        break;
+                    }
+
+                    else
+                    {
+                        isMaster = false;
+                        break;
+                    }
+                }
+            }
+
+            return isMaster;
+        }
+
+        private static bool VideoPlayerCheck()
+        {
+            bool videoPlayerActive;
+            try
+            {
+                var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+
+                if (videoPlayer != null)
+                {
+                    videoPlayerActive = true;
+                    return videoPlayerActive;
+                }
+
+                else
+                {
+                    videoPlayerActive = false;
+                    return videoPlayerActive;
+                }
+            }
+
+            catch (Exception)
+            {
+                videoPlayerActive = false;
+                return videoPlayerActive;
+            }
         }
     }
 }
