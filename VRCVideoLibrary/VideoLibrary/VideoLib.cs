@@ -115,7 +115,7 @@ namespace VideoLibrary
                         {
                             MelonCoroutines.Start(CoolDown());
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null); //"Puts " + video.VideoName + " on the video player"
+                    }, $"Puts {video.VideoName} on the video player", null, null);
 
                     video.VideoButton = vidButton;
                 }
