@@ -4,7 +4,7 @@
  ## How to Use
 1. Download and install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader).
 2. Download [UIExpansionKit](https://github.com/knah/VRCMods), and place it into your VRChat "Mods" folder.
-3. Download the [VRCVideoLibrary.dll](https://github.com/UshioHiko/VRCVideoLibrary/releases/tag/V0.1.0), and place it into your VRChat "Mods" folder.
+3. Download the [VRCVideoLibrary.dll](https://github.com/UshioHiko/VRCVideoLibrary/releases/tag/V0.2.0), and place it into your VRChat "Mods" folder.
 4. Done!
 
 ## Credits
