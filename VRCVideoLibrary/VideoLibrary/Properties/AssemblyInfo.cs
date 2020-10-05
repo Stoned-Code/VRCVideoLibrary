@@ -37,5 +37,5 @@ using VideoLibrary;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 // MelonLoader Stuff
-[assembly: MelonInfo(typeof(VideoLib), "VRC Video Library", "0.1.0", "UHModz")]
+[assembly: MelonInfo(typeof(VideoLib), LibraryBuildInfo.modName, LibraryBuildInfo.modVersion, LibraryBuildInfo.modAuthor, LibraryBuildInfo.modDownload)]
 [assembly: MelonGame("VRChat", "VRChat")]

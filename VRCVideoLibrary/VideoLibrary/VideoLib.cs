@@ -18,6 +18,13 @@ using VRCSDK2;
 
 namespace VideoLibrary
 {
+    public static class LibraryBuildInfo
+    {
+        public const string modName = "VRC Video Library";
+        public const string modVersion = "0.5.0";
+        public const string modAuthor = "UHModz";
+        public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
+    }
     public class VideoLib : MelonMod
     {
         protected List<ModVideo> videoList;
@@ -25,6 +32,7 @@ namespace VideoLibrary
         private int indexNumber = 0;
         private int currentMenuIndex;
         private bool onCooldown = false;
+        private bool getLink = false;
 
         private string videoDirectory;
 
@@ -41,14 +49,14 @@ namespace VideoLibrary
 
         public override void VRChat_OnUiManagerInit()
         {
+            videoLibrary = new QMNestedButton("ShortcutMenu", -10, 0, "", "", null, null, null, null);
+            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Image>().enabled = false;
+            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Text>().enabled = false;
+
             ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.QuickMenu, "Video\nLibrary", delegate
             {
                 videoLibrary.getMainButton().getGameObject().GetComponent<Button>().Press();
             });
-
-            videoLibrary = new QMNestedButton("ShortcutMenu", -10, 0, "", "", null, null, null, null);
-            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Image>().enabled = false;
-            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Text>().enabled = false;
 
             var indexButton = new QMSingleButton(videoLibrary, 4, 1, "Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString(), delegate { }, "", Color.clear, Color.yellow);
             indexButton.getGameObject().GetComponentInChildren<Button>().enabled = false;
@@ -98,10 +106,23 @@ namespace VideoLibrary
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
 
-            var openListButton = new QMSingleButton(videoLibrary, 5, -1, "Open\nVideo\nList", delegate
+            var openReadMe = new QMSingleButton(videoLibrary, 5, 0, "Read\nMe", delegate
+            {
+                Process.Start("https://github.com/UshioHiko/VRCVideoLibrary/blob/master/README.md");
+            }, "Opens a link to the mod's \"Read Me\"");
+
+            var openListButton = new QMSingleButton(videoLibrary, 5, -1, "Open\nLibrary\nDocument", delegate
             {
                 OpenVideoLibrary();
             }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
+
+            var getLinkToggle = new QMToggleButton(videoLibrary, 5, 1, "Buttons Copy\nVideo Link", delegate
+            {
+                getLink = true;
+            }, "Disabled", delegate
+            {
+                getLink = false;
+            }, "Makes video library buttons copy video url to your system clipboard", null, null, false, false);
 
             foreach (ModVideo video in videoList)
             {
@@ -109,11 +130,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -124,11 +153,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -139,11 +176,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -154,11 +199,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -169,11 +222,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -184,11 +245,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -199,11 +268,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -214,11 +291,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -229,11 +314,19 @@ namespace VideoLibrary
                 {
                     var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
                     {
-                        MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                        if (!onCooldown)
+                        if (getLink)
                         {
-                            MelonCoroutines.Start(CoolDown());
+                            video.GetLink();
+                        }
+
+                        else
+                        {
+                            MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                            if (!onCooldown)
+                            {
+                                MelonCoroutines.Start(CoolDown());
+                            }
                         }
                     }, $"Puts {video.VideoName} on the video player", null, null);
 
@@ -388,6 +481,12 @@ namespace VideoLibrary
                     VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master can set videos...");
                 }
             }
+        }
+
+        public void GetLink()
+        {
+            System.Windows.Forms.Clipboard.SetText(VideoLink);
+            VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Video link copied to system clipboard");
         }
 
         private static bool MasterCheck(string UserID)
