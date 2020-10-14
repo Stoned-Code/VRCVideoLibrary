@@ -21,10 +21,11 @@ namespace VideoLibrary
     public static class LibraryBuildInfo
     {
         public const string modName = "VRC Video Library";
-        public const string modVersion = "0.5.0";
+        public const string modVersion = "0.6.0";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
+
     public class VideoLib : MelonMod
     {
         protected List<ModVideo> videoList;
@@ -386,7 +387,7 @@ namespace VideoLibrary
             while ((line = file.ReadLine()) != null)
             {
                 var lineArray = line.Split('|');
-                videoList.Add(new ModVideo { VideoName = lineArray[0], VideoLink = lineArray[1] });
+                videoList.Add(new ModVideo(lineArray[0], lineArray[1])); //{ VideoName = lineArray[0], VideoLink = lineArray[1] }
             }
 
             file.Close();
@@ -431,6 +432,14 @@ namespace VideoLibrary
 
     public class ModVideo : IComparable<ModVideo>
     {
+        public ModVideo(string videoName, string videoLink, int videoNumber = 0, int indexNumber = 0)
+        {
+            this.VideoName = videoName;
+            this.VideoLink = videoLink;
+            this.VideoNumber = videoNumber;
+            this.IndexNumber = indexNumber;
+        }
+
         public string VideoName { get; set; }
         public string VideoLink { get; set; }
         public int VideoNumber { get; set; }
