@@ -21,7 +21,7 @@ namespace VideoLibrary
     public static class LibraryBuildInfo
     {
         public const string modName = "VRC Video Library";
-        public const string modVersion = "0.6.0";
+        public const string modVersion = "0.6.1";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -124,6 +124,11 @@ namespace VideoLibrary
             {
                 getLink = false;
             }, "Makes video library buttons copy video url to your system clipboard", null, null, false, false);
+
+            var videoFromClipboard = new QMSingleButton(videoLibrary, 0, -1, "Video From\nClipboard", delegate
+            {
+                MelonCoroutines.Start(ModVideo.VideoFromClipboard(onCooldown));
+            }, "Puts the link in your system clipboard into the world's video player");
 
             foreach (ModVideo video in videoList)
             {
@@ -525,6 +530,42 @@ namespace VideoLibrary
             }
 
             return isMaster;
+        }
+
+        public static IEnumerator VideoFromClipboard(bool onCooldown)
+        {
+            var videoPlayerActive = VideoPlayerCheck();
+            var isMaster = MasterCheck(APIUser.CurrentUser.id);
+
+            if (videoPlayerActive)
+            {
+                if (isMaster)
+                {
+                    if (!onCooldown)
+                    {
+                        var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+
+                        videoPlayer.Clear();
+                        videoPlayer.AddURL(System.Windows.Forms.Clipboard.GetText());
+
+                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+
+                        yield return new WaitForSeconds(30);
+
+                        videoPlayer.Next();
+                    }
+
+                    else
+                    {
+                        VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Video Library is on 30 second cooldown");
+                    }
+                }
+
+                else
+                {
+                    VRCUiManager.field_Protected_Static_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master can set videos...");
+                }
+            }
         }
 
         private static bool VideoPlayerCheck()
