@@ -134,7 +134,6 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Configuration.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Xml.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Iced.dll
-R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.CrashLog.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.CrashReportingModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.GridModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.ImageConversionModule.dll
@@ -162,3 +161,4 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\Vi
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\VideoLibrary.csproj.CopyComplete
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\VRCVideoLibrary.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\VRCVideoLibrary.pdb
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Memory.dll
