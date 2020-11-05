@@ -151,7 +151,6 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Un
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.VFXModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.VRModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.WindModule.dll
-R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Rackspace.Collections.Immutable.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\websocket-sharp.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Drawing.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.Serialization.OdinSerializer.dll
@@ -162,3 +161,8 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\Vi
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\VRCVideoLibrary.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\obj\Debug\VRCVideoLibrary.pdb
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Memory.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Il2CppSystem.Collections.Immutable.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.Serialization.AOT.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.VM.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.VRCWrapperModules.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.Wrapper.dll

@@ -13,6 +13,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
+using VRC.SDK3.Video.Components;
+using VRC.SDK3.Video.Components.AVPro;
+using VRC.SDK3.Video.Interfaces;
+using VRC.SDK3.Video.Interfaces.AVPro;
 using VRC.SDKBase;
 using VRCSDK2;
 
@@ -21,7 +25,7 @@ namespace VideoLibrary
     public static class LibraryBuildInfo
     {
         public const string modName = "VRC Video Library";
-        public const string modVersion = "0.6.1";
+        public const string modVersion = "0.6.2";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -132,211 +136,232 @@ namespace VideoLibrary
 
             foreach (ModVideo video in videoList)
             {
-                if (video.VideoNumber == 0)
+                switch (video.VideoNumber)
                 {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 0:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 1)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 1:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 2)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 2:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 3)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 3:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 4)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 4:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 5)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 5:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 6)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 6:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 7)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 7:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
+
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
                         }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
 
-                    video.VideoButton = vidButton;
-                }
-
-                else if (video.VideoNumber == 8)
-                {
-                    var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
-                    {
-                        if (getLink)
+                    case 8:
                         {
-                            video.GetLink();
-                        }
-
-                        else
-                        {
-                            MelonCoroutines.Start(video.AddVideo(onCooldown));
-
-                            if (!onCooldown)
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
                             {
-                                MelonCoroutines.Start(CoolDown());
-                            }
-                        }
-                    }, $"Puts {video.VideoName} on the video player", null, null);
+                                if (getLink)
+                                {
+                                    video.GetLink();
+                                }
 
-                    video.VideoButton = vidButton;
+                                else
+                                {
+                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+
+                                    if (!onCooldown)
+                                    {
+                                        MelonCoroutines.Start(CoolDown());
+                                    }
+                                }
+                            }, $"Puts {video.VideoName} on the video player", null, null);
+
+                            video.VideoButton = vidButton;
+                            vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
+                            break;
+                        }
                 }
 
                 if (video.IndexNumber != currentMenuIndex)
@@ -473,15 +498,36 @@ namespace VideoLibrary
                     if (!onCooldown)
                     {
                         var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+                        var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
 
-                        videoPlayer.Clear();
-                        videoPlayer.AddURL(VideoLink);
+                        VideoPlayerType playerType = VideoPlayerType.None;
 
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                        if (videoPlayer != null) playerType = VideoPlayerType.ClassicPlayer;
+                        else if (udonPlayer != null) playerType = VideoPlayerType.UdonPlayer;
 
-                        yield return new WaitForSeconds(30);
 
-                        videoPlayer.Next();
+                        if (playerType == VideoPlayerType.ClassicPlayer)
+                        {
+                            videoPlayer.Clear();
+                            videoPlayer.AddURL(VideoLink);
+
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+
+                            yield return new WaitForSeconds(30);
+
+                            videoPlayer.Next();
+                        }
+
+                        else if (playerType == VideoPlayerType.UdonPlayer)
+                        {
+                            udonPlayer.videoURL.url = VideoLink;
+
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+
+                            yield return new WaitForSeconds(30);
+
+                            udonPlayer.LoadURL(udonPlayer.videoURL);
+                        }
                     }
 
                     else
@@ -544,15 +590,35 @@ namespace VideoLibrary
                     if (!onCooldown)
                     {
                         var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+                        var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
 
-                        videoPlayer.Clear();
-                        videoPlayer.AddURL(System.Windows.Forms.Clipboard.GetText());
+                        VideoPlayerType playerType = VideoPlayerType.None;
 
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                        if (videoPlayer != null) playerType = VideoPlayerType.ClassicPlayer;
+                        else if (udonPlayer != null) playerType = VideoPlayerType.UdonPlayer;
 
-                        yield return new WaitForSeconds(30);
+                        if (playerType == VideoPlayerType.ClassicPlayer)
+                        {
+                            videoPlayer.Clear();
+                            videoPlayer.AddURL(System.Windows.Forms.Clipboard.GetText());
 
-                        videoPlayer.Next();
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+
+                            yield return new WaitForSeconds(30);
+
+                            videoPlayer.Next();
+                        }
+
+                        else if (playerType == VideoPlayerType.UdonPlayer)
+                        {
+                            udonPlayer.videoURL.url = System.Windows.Forms.Clipboard.GetText();
+
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+
+                            yield return new WaitForSeconds(30);
+
+                            udonPlayer.LoadURL(udonPlayer.videoURL);
+                        }
                     }
 
                     else
@@ -574,8 +640,9 @@ namespace VideoLibrary
             try
             {
                 var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+                var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
 
-                if (videoPlayer != null)
+                if (videoPlayer != null || udonPlayer != null)
                 {
                     videoPlayerActive = true;
                     return videoPlayerActive;
@@ -593,6 +660,13 @@ namespace VideoLibrary
                 videoPlayerActive = false;
                 return videoPlayerActive;
             }
+        }
+
+        public enum VideoPlayerType
+        {
+            UdonPlayer,
+            ClassicPlayer,
+            None
         }
     }
 }
