@@ -1,7 +1,7 @@
 # VRCVideoLibrary
 A VRChat mod that allows you to add buttons to your menu that puts videos on VRC video players. All through a text document.
 
-- Buttons only work if you're the world master.
+- Buttons only work if you're the world master. (Working on allowing friends of the room master and/or instance creator input videos)
 - Supports USharpVideo. (Local Only)
 
 ## How to Use
