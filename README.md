@@ -1,8 +1,8 @@
 # VRCVideoLibrary
 A VRChat mod that allows you to add buttons to your menu that puts videos on VRC video players. All through a text document.
 
-- Buttons only work if you're the world master.
-- Doesn't support USharpVideo. (Yet!)
+- Buttons only work if you're the world master, instance creator or friends with either.
+- Supports USharpVideo. (Local Only)
 
 ## How to Use
 1. Download and install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader).
