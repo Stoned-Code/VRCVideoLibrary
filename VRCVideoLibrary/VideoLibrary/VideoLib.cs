@@ -25,7 +25,7 @@ namespace VideoLibrary
     public static class LibraryBuildInfo
     {
         public const string modName = "VRC Video Library";
-        public const string modVersion = "0.6.2";
+        public const string modVersion = "0.6.4";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -45,6 +45,10 @@ namespace VideoLibrary
 
         private QMSingleButton previousButton;
         private QMSingleButton nextButton;
+
+        //////////////////////
+        //  VRChat Methods  //
+        //////////////////////
 
         public override void OnApplicationStart()
         {
@@ -377,6 +381,10 @@ namespace VideoLibrary
             }
         }
 
+        ///////////////////////
+        //  Library Methods  //
+        ///////////////////////
+
         public void InitializeLibrary()
         {
             string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
@@ -476,6 +484,8 @@ namespace VideoLibrary
         public int IndexNumber { get; set; }
         public QMSingleButton VideoButton { get; set; }
 
+        private static bool IsFriendsWith(string id) => APIUser.CurrentUser.friendIDs.Contains(id);
+
         public int CompareTo(ModVideo other)
         {
             return this.VideoName.CompareTo(other.VideoName);
@@ -490,10 +500,12 @@ namespace VideoLibrary
         {
             var videoPlayerActive = VideoPlayerCheck();
             var isMaster = MasterCheck(APIUser.CurrentUser.id);
+            var friendsWithMaster = FriendsWithMaster();
+            var friendsWithCreator = IsFriendsWith(InstanceCreatorId);
 
             if (videoPlayerActive)
             {
-                if (isMaster)
+                if (isMaster || friendsWithCreator || friendsWithMaster || APIUser.CurrentUser.id == InstanceCreatorId)
                 {
                     if (!onCooldown)
                     {
@@ -538,7 +550,7 @@ namespace VideoLibrary
 
                 else
                 {
-                    VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master can set videos...");
+                    VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master and their friends can set videos...");
                 }
             }
         }
@@ -577,6 +589,25 @@ namespace VideoLibrary
 
             return isMaster;
         }
+
+        private static bool FriendsWithMaster()
+        {
+            var playerManager = PlayerManager.field_Private_Static_PlayerManager_0.prop_ArrayOf_Player_0;
+
+            for (int i = 0; i < playerManager.Length; i++)
+            {
+                var player = playerManager[i];
+                var apiUser = player.field_Private_APIUser_0;
+                var isFriends = IsFriendsWith(apiUser.id);
+
+                if (!player.field_Private_VRCPlayerApi_0.isMaster) continue;
+                if (isFriends) return true;
+            }
+
+            return false;
+        }
+
+        private static string InstanceCreatorId => RoomManager.field_Internal_Static_ApiWorldInstance_0.GetInstanceCreator();
 
         public static IEnumerator VideoFromClipboard(bool onCooldown)
         {
