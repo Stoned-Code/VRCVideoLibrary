@@ -6,8 +6,8 @@ A VRChat mod that allows you to add buttons to your menu that puts videos on VRC
 
 ## How to Use
 1. Download and install [MelonLoader](https://github.com/HerpDerpinstine/MelonLoader).
-2. Download [UIExpansionKit.dll](https://github.com/knah/VRCMods/releases/tag/updates-2020-10-28), and place it into your VRChat "Mods" folder.
-3. Download the [VRCVideoLibrary.dll](https://github.com/UshioHiko/VRCVideoLibrary/releases/tag/0.6.2), and place it into your VRChat "Mods" folder.
+2. Download [UIExpansionKit.dll](https://github.com/knah/VRCMods/releases/tag/updates-2020-11-22), and place it into your VRChat "Mods" folder.
+3. Download the [VRCVideoLibrary.dll](https://github.com/UshioHiko/VRCVideoLibrary/releases/tag/0.6.4), and place it into your VRChat "Mods" folder.
 4. Done!
 
 ## Credits
