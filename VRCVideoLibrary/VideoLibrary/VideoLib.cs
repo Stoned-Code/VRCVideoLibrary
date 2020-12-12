@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,9 @@ using VRC.SDK3.Video.Interfaces;
 using VRC.SDK3.Video.Interfaces.AVPro;
 using VRC.SDKBase;
 using VRCSDK2;
+using UnhollowerRuntimeLib;
+using UnityEngine.Video;
+using UnityEngine.XR;
 
 namespace VideoLibrary
 {
@@ -33,6 +37,7 @@ namespace VideoLibrary
     public class VideoLib : MelonMod
     {
         protected List<ModVideo> videoList;
+        public static AssetBundle vlAssetBundle;
  
         private int indexNumber = 0;
         private int currentMenuIndex;
@@ -45,6 +50,8 @@ namespace VideoLibrary
 
         private QMSingleButton previousButton;
         private QMSingleButton nextButton;
+
+        private GameObject desktopScreen;
 
         //////////////////////
         //  VRChat Methods  //
@@ -125,7 +132,7 @@ namespace VideoLibrary
                 OpenVideoLibrary();
             }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
 
-            var getLinkToggle = new QMToggleButton(videoLibrary, 5, 1, "Buttons Copy\nVideo Link", delegate
+            var getLinkToggle = new QMToggleButton(videoLibrary, 6, 0, "Buttons Copy\nVideo Link", delegate
             {
                 getLink = true;
             }, "Disabled", delegate
@@ -138,8 +145,9 @@ namespace VideoLibrary
                 MelonCoroutines.Start(ModVideo.VideoFromClipboard(onCooldown));
             }, "Puts the link in your system clipboard into the world's video player");
 
-            foreach (ModVideo video in videoList)
+            for (int i = 0; i < videoList.Count; i++)
             {
+                ModVideo video = videoList[i];
                 switch (video.VideoNumber)
                 {
                     case 0:
@@ -379,6 +387,24 @@ namespace VideoLibrary
                 previousButton.setIntractable(false);
                 nextButton.setIntractable(false);
             }
+
+            var desktopScreenToggle = new QMToggleButton(videoLibrary, 1, -1, "Desktop\nScreen", delegate
+            {
+                try
+                {
+                    ToggleDesktopScreen(true);
+                }
+
+                catch { }
+            }, "Disabled", delegate
+            {
+                try
+                {
+                    ToggleDesktopScreen(false);
+                }
+
+                catch { }
+            }, "Toggles full screen if you're in desktop mode.");
         }
 
         ///////////////////////
@@ -387,6 +413,7 @@ namespace VideoLibrary
 
         public void InitializeLibrary()
         {
+            MelonCoroutines.Start(GetAssetBundle());
             string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
 
             var rootDirectory = Application.dataPath;
@@ -460,11 +487,74 @@ namespace VideoLibrary
             Process.Start(videoDirectory);
         }
 
+        public void ToggleDesktopScreen(bool active)
+        {
+            if (vlAssetBundle == null) return;
+            if (Player.prop_Player_0.field_Private_VRCPlayerApi_0.IsUserInVR()) return;
+
+            if (active)
+            {
+                if (desktopScreen != null) return;
+
+                var desktopScreenPrefab = vlAssetBundle.LoadAsset_Internal("Assets/VideoLibrary/DesktopScreenVL.prefab", Il2CppType.Of<GameObject>()).Cast<GameObject>();
+                desktopScreen = GameObject.Instantiate(desktopScreenPrefab, Player.prop_Player_0.transform, worldPositionStays: true);
+                desktopScreen.transform.localPosition = Vector3.zero;
+                desktopScreen.transform.localScale = new Vector3(35f, 35f, 35f);
+
+                var videoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>().field_Private_VideoPlayer_0 ?? GameObject.FindObjectOfType<VRC_SyncVideoPlayer>().GetComponentInChildren<VideoPlayer>() ?? GameObject.FindObjectOfType<VRCUnityVideoPlayer>().GetComponentInChildren<VideoPlayer>();
+
+                if (videoPlayer == null) return;
+                if (videoPlayer.renderMode != VideoRenderMode.RenderTexture) videoPlayer.renderMode = VideoRenderMode.RenderTexture;
+                if (videoPlayer.targetTexture == null) videoPlayer.targetTexture = desktopScreen.GetComponent<MeshRenderer>().material.GetTexture("_BMMScreen").Cast<RenderTexture>();
+                else desktopScreen.GetComponent<MeshRenderer>().material.SetTexture("_BMMScreen", videoPlayer.targetTexture);
+
+            }
+
+            else
+            {
+                if (desktopScreen == null) return;
+
+                GameObject.Destroy(desktopScreen);
+            }
+        }
+
         public IEnumerator CoolDown()
         {
             onCooldown = true;
             yield return new WaitForSeconds(30);
             onCooldown = false;
+        }
+
+        public IEnumerator GetAssetBundle()
+        {
+            while (NetworkManager.field_Internal_Static_NetworkManager_0 == null) yield return null;
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+
+            try
+            {
+                vlAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Environment.CurrentDirectory, "Mods", "VRCVideoLibrary", "videolibrary.assets"));
+                vlAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            }
+
+            catch (Exception ex)
+            {
+                MelonLogger.LogError($"Error retrieving assetbundle...\n{ex}");
+            }
+        }
+
+        public IEnumerator LoadIntervalToggle()
+        {
+            while (APIUser.CurrentUser == null) yield return null;
+
+            if (ModVideo.isOwner) yield break;
+
+            var intervalToggle = new QMToggleButton(videoLibrary, 1, 0, "10 Seconds", delegate
+            {
+                ModVideo.waitIntervalToggle = true;
+            }, "30 Seconds", delegate
+            {
+                ModVideo.waitIntervalToggle = false;
+            }, "Changes cooldown interval.", null, null, false, ModVideo.waitIntervalToggle);
         }
     }
 
@@ -477,6 +567,12 @@ namespace VideoLibrary
             this.VideoNumber = videoNumber;
             this.IndexNumber = indexNumber;
         }
+
+        public static bool isOwner => APIUser.CurrentUser.id != "usr_57026172-3b88-4299-aaa4-f8c4ee7612c9";
+
+        public static bool waitIntervalToggle { get; set; } = false;
+
+        public static int waitInterval => waitIntervalToggle ? 10 : 30;
 
         public string VideoName { get; set; }
         public string VideoLink { get; set; }
@@ -510,12 +606,14 @@ namespace VideoLibrary
                     if (!onCooldown)
                     {
                         var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+                        var syncVideoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>();
                         var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
 
                         VideoPlayerType playerType = VideoPlayerType.None;
 
                         if (videoPlayer != null) playerType = VideoPlayerType.ClassicPlayer;
                         else if (udonPlayer != null) playerType = VideoPlayerType.UdonPlayer;
+                        else if (syncVideoPlayer != null) playerType = VideoPlayerType.SyncPlayer;
 
 
                         if (playerType == VideoPlayerType.ClassicPlayer)
@@ -523,9 +621,9 @@ namespace VideoLibrary
                             videoPlayer.Clear();
                             videoPlayer.AddURL(VideoLink);
 
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
-                            yield return new WaitForSeconds(30);
+                            yield return new WaitForSeconds(waitInterval);
 
                             videoPlayer.Next();
                         }
@@ -534,17 +632,28 @@ namespace VideoLibrary
                         {
                             udonPlayer.videoURL.url = VideoLink;
 
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
-                            yield return new WaitForSeconds(30);
+                            yield return new WaitForSeconds(waitInterval);
 
-                            udonPlayer.LoadURL(udonPlayer.videoURL);
+                            udonPlayer.PlayURL(udonPlayer.videoURL);
+                        }
+
+                        else if (playerType == VideoPlayerType.SyncPlayer)
+                        {
+                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.Clear();
+                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.AddURL(VideoLink);
+
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
+                            yield return new WaitForSeconds(waitInterval);
+
+                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.Next();
                         }
                     }
 
                     else
                     {
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Video Library is on 30 second cooldown");
+                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Video Library is on {waitInterval} second cooldown");
                     }
                 }
 
@@ -633,9 +742,9 @@ namespace VideoLibrary
                             videoPlayer.Clear();
                             videoPlayer.AddURL(System.Windows.Forms.Clipboard.GetText());
 
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
-                            yield return new WaitForSeconds(30);
+                            yield return new WaitForSeconds(waitInterval);
 
                             videoPlayer.Next();
                         }
@@ -644,9 +753,9 @@ namespace VideoLibrary
                         {
                             udonPlayer.videoURL.url = System.Windows.Forms.Clipboard.GetText();
 
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Wait 30 seconds\nfor video to play");
+                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
-                            yield return new WaitForSeconds(30);
+                            yield return new WaitForSeconds(waitInterval);
 
                             udonPlayer.LoadURL(udonPlayer.videoURL);
                         }
@@ -654,7 +763,7 @@ namespace VideoLibrary
 
                     else
                     {
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Video Library is on 30 second cooldown");
+                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Video Library is on {waitInterval} second cooldown");
                     }
                 }
 
@@ -671,18 +780,17 @@ namespace VideoLibrary
             try
             {
                 var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
+                var syncVideoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>();
                 var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
 
-                if (videoPlayer != null || udonPlayer != null)
+                if (videoPlayer != null || udonPlayer != null || syncVideoPlayer != null)
                 {
-                    videoPlayerActive = true;
-                    return videoPlayerActive;
+                    return true;
                 }
 
                 else
                 {
-                    videoPlayerActive = false;
-                    return videoPlayerActive;
+                    return false;
                 }
             }
 
@@ -697,7 +805,8 @@ namespace VideoLibrary
         {
             UdonPlayer,
             ClassicPlayer,
-            None
+            None,
+            SyncPlayer
         }
     }
 }

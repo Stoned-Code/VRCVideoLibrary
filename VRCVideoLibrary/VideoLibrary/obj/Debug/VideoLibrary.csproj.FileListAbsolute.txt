@@ -99,7 +99,6 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VR
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRCSDK2.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRCSDKBase.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.AnimationModule.dll
-R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Photon3Unity3D.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Unity.TextMeshPro.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.AudioModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.TextRenderingModule.dll
@@ -116,7 +115,6 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Un
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Transmtn.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Rug.Osc.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Oculus.VR.dll
-R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.VideoModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\UnityEngine.ClothModule.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\NSpeex.dll
@@ -166,3 +164,5 @@ R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VR
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.VM.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.VRCWrapperModules.dll
 R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\VRC.Udon.Wrapper.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\DOTween.dll
+R:\Github Repositories\VRCVideoLibrary\VRCVideoLibrary\VideoLibrary\bin\Debug\Photon-DotNet.dll
