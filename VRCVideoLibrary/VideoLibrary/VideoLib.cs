@@ -21,15 +21,16 @@ using VRC.SDK3.Video.Interfaces.AVPro;
 using VRC.SDKBase;
 using VRCSDK2;
 using UnhollowerRuntimeLib;
-using UnityEngine.Video;
 using UnityEngine.XR;
+using static VRC.SDK3.Video.Components.VRCUnityVideoPlayer;
+using VideoRenderMode = VRC.SDK3.Video.Components.VRCUnityVideoPlayer.VideoRenderMode;
 
 namespace VideoLibrary
 {
     public static class LibraryBuildInfo
     {
         public const string modName = "VRC Video Library";
-        public const string modVersion = "0.6.5";
+        public const string modVersion = "1.0.0";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -496,15 +497,15 @@ namespace VideoLibrary
             {
                 if (desktopScreen != null) return;
 
-                var desktopScreenPrefab = vlAssetBundle.LoadAsset_Internal("Assets/VideoLibrary/DesktopScreenVL.prefab", Il2CppType.Of<GameObject>()).Cast<GameObject>();
+                var desktopScreenPrefab = vlAssetBundle.LoadAsset_Internal("Assets/VideoLibrary/DesktopScreenVL.prefab", UnhollowerRuntimeLib.Il2CppType.Of<GameObject>()).Cast<GameObject>();
                 desktopScreen = GameObject.Instantiate(desktopScreenPrefab, Player.prop_Player_0.transform, worldPositionStays: true);
                 desktopScreen.transform.localPosition = Vector3.zero;
                 desktopScreen.transform.localScale = new Vector3(35f, 35f, 35f);
 
-                var videoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>().field_Private_VideoPlayer_0 ?? GameObject.FindObjectOfType<VRC_SyncVideoPlayer>().GetComponentInChildren<VideoPlayer>() ?? GameObject.FindObjectOfType<VRCUnityVideoPlayer>().GetComponentInChildren<VideoPlayer>();
+                var videoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>().field_Private_VideoPlayer_0 ?? GameObject.FindObjectOfType<VRC_SyncVideoPlayer>().GetComponentInChildren<UnityEngine.Video.VideoPlayer>() ?? GameObject.FindObjectOfType<VRCUnityVideoPlayer>().GetComponentInChildren<UnityEngine.Video.VideoPlayer>();
 
                 if (videoPlayer == null) return;
-                if (videoPlayer.renderMode != VideoRenderMode.RenderTexture) videoPlayer.renderMode = VideoRenderMode.RenderTexture;
+                if (videoPlayer.renderMode != UnityEngine.Video.VideoRenderMode.RenderTexture) videoPlayer.renderMode = UnityEngine.Video.VideoRenderMode.RenderTexture;
                 if (videoPlayer.targetTexture == null) videoPlayer.targetTexture = desktopScreen.GetComponent<MeshRenderer>().material.GetTexture("_BMMScreen").Cast<RenderTexture>();
                 else desktopScreen.GetComponent<MeshRenderer>().material.SetTexture("_BMMScreen", videoPlayer.targetTexture);
 
