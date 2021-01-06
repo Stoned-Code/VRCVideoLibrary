@@ -6,31 +6,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
 using VRC.SDK3.Video.Components;
-using VRC.SDK3.Video.Components.AVPro;
-using VRC.SDK3.Video.Interfaces;
-using VRC.SDK3.Video.Interfaces.AVPro;
-using VRC.SDKBase;
 using VRCSDK2;
-using UnhollowerRuntimeLib;
-using UnityEngine.XR;
-using static VRC.SDK3.Video.Components.VRCUnityVideoPlayer;
-using VideoRenderMode = VRC.SDK3.Video.Components.VRCUnityVideoPlayer.VideoRenderMode;
 
 namespace VideoLibrary
 {
     public static class LibraryBuildInfo
     {
-        public const string modName = "VRC Video Library";
-        public const string modVersion = "1.0.0";
+        public const string modName = "VRCVideoLibrary";
+        public const string modVersion = "1.0.5";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -44,6 +33,8 @@ namespace VideoLibrary
         private int currentMenuIndex;
         private bool onCooldown = false;
         private bool getLink = false;
+
+        private bool libraryInitialized = false;
 
         private string videoDirectory;
 
@@ -61,7 +52,7 @@ namespace VideoLibrary
         public override void OnApplicationStart()
         {
             videoList = new List<ModVideo>();
-            InitializeLibrary();
+            MelonCoroutines.Start(InitializeLibrary());
         }
 
         public override void VRChat_OnUiManagerInit()
@@ -75,6 +66,51 @@ namespace VideoLibrary
                 videoLibrary.getMainButton().getGameObject().GetComponent<Button>().Press();
             });
 
+            MelonCoroutines.Start(LoadMenu());
+        }
+
+        ///////////////////////
+        //  Library Methods  //
+        ///////////////////////
+
+        public IEnumerator InitializeLibrary()
+        {
+            while (NetworkManager.field_Internal_Static_NetworkManager_0 == null) yield return null;
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+
+            GetAssetBundle();
+            string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
+
+            var rootDirectory = Application.dataPath;
+            rootDirectory += @"\..\";
+
+            var subDirectory = rootDirectory + @"\UHModz\";
+
+            videoDirectory = subDirectory + "Videos.txt";
+
+            if (!Directory.Exists(subDirectory))
+            {
+                Directory.CreateDirectory(subDirectory);
+                MelonLogger.Log("Created UHModz Directory!");
+            }
+
+            if (!File.Exists(videoDirectory))
+            {
+                using (StreamWriter sw = File.CreateText(videoDirectory))
+                {
+                    sw.WriteLine(exampleVideo);
+                    sw.Close();
+                }
+            }
+
+            GetVideoLibrary();
+
+            libraryInitialized = true;
+        }
+
+        private IEnumerator LoadMenu()
+        {
+            while (!libraryInitialized) yield return null;
             var indexButton = new QMSingleButton(videoLibrary, 4, 1, "Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString(), delegate { }, "", Color.clear, Color.yellow);
             indexButton.getGameObject().GetComponentInChildren<Button>().enabled = false;
             indexButton.getGameObject().GetComponentInChildren<Image>().enabled = false;
@@ -389,6 +425,8 @@ namespace VideoLibrary
                 nextButton.setIntractable(false);
             }
 
+            if (vlAssetBundle == null) yield break;
+
             var desktopScreenToggle = new QMToggleButton(videoLibrary, 1, -1, "Desktop\nScreen", delegate
             {
                 try
@@ -406,40 +444,6 @@ namespace VideoLibrary
 
                 catch { }
             }, "Toggles full screen if you're in desktop mode.");
-        }
-
-        ///////////////////////
-        //  Library Methods  //
-        ///////////////////////
-
-        public void InitializeLibrary()
-        {
-            MelonCoroutines.Start(GetAssetBundle());
-            string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
-
-            var rootDirectory = Application.dataPath;
-            rootDirectory += @"\..\";
-
-            var subDirectory = rootDirectory + @"\UHModz\";
-
-            videoDirectory = subDirectory + "Videos.txt";
-
-            if (!Directory.Exists(subDirectory))
-            {
-                Directory.CreateDirectory(subDirectory);
-                MelonLogger.Log("Created UHModz Directory!");
-            }
-
-            if (!File.Exists(videoDirectory))
-            {
-                using (StreamWriter sw = File.CreateText(videoDirectory))
-                {
-                    sw.WriteLine(exampleVideo);
-                    sw.Close();
-                }
-            }
-
-            GetVideoLibrary();
         }
 
         public void GetVideoLibrary()
@@ -526,15 +530,25 @@ namespace VideoLibrary
             onCooldown = false;
         }
 
-        public IEnumerator GetAssetBundle()
+        public void GetAssetBundle()
         {
-            while (NetworkManager.field_Internal_Static_NetworkManager_0 == null) yield return null;
-            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
-
             try
             {
-                vlAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Environment.CurrentDirectory, "Mods", "VRCVideoLibrary", "videolibrary.assets"));
-                vlAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VRCVideoLibrary.videolibrary.vl"))
+                {
+                    if (stream == null) return;
+                    using (var tempStream = new MemoryStream((int)stream.Length))
+                    {
+                        if (stream != null)
+                        {
+                            stream.CopyTo(tempStream);
+
+                            vlAssetBundle = AssetBundle.LoadFromMemory_Internal(tempStream.ToArray(), 0);
+                            vlAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                        }
+                    }
+                }
+
             }
 
             catch (Exception ex)
