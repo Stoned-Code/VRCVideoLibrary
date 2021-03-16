@@ -16,10 +16,10 @@ using VRCSDK2;
 
 namespace VideoLibrary
 {
-    public static class LibraryBuildInfo
+    internal static class LibraryBuildInfo
     {
         public const string modName = "VRCVideoLibrary";
-        public const string modVersion = "1.0.5";
+        public const string modVersion = "1.1.2";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -27,7 +27,6 @@ namespace VideoLibrary
     public class VideoLib : MelonMod
     {
         protected List<ModVideo> videoList;
-        public static AssetBundle vlAssetBundle;
  
         private int indexNumber = 0;
         private int currentMenuIndex;
@@ -42,8 +41,6 @@ namespace VideoLibrary
 
         private QMSingleButton previousButton;
         private QMSingleButton nextButton;
-
-        private GameObject desktopScreen;
 
         //////////////////////
         //  VRChat Methods  //
@@ -60,10 +57,10 @@ namespace VideoLibrary
             videoLibrary = new QMNestedButton("ShortcutMenu", -10, 0, "", "", null, null, null, null);
             videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Image>().enabled = false;
             videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Text>().enabled = false;
-
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.QuickMenu, "Video\nLibrary", delegate
+            
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Video\nLibrary", delegate
             {
-                videoLibrary.getMainButton().getGameObject().GetComponent<Button>().Press();
+                videoLibrary.getMainButton().getGameObject().GetComponent<Button>().onClick.Invoke();
             });
 
             MelonCoroutines.Start(LoadMenu());
@@ -78,20 +75,23 @@ namespace VideoLibrary
             while (NetworkManager.field_Internal_Static_NetworkManager_0 == null) yield return null;
             while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
 
-            GetAssetBundle();
             string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
 
-            var rootDirectory = Application.dataPath;
-            rootDirectory += @"\..\";
+            var rootDirectory = Environment.CurrentDirectory;
+            var oldSubDirectory = Path.Combine(rootDirectory, "UHModz"); // Remove in future.
+            var subDirectory = Path.Combine(rootDirectory, "UserData", "UHModz");
 
-            var subDirectory = rootDirectory + @"\UHModz\";
+            
+            // Remove in future.
+            if (Directory.Exists(oldSubDirectory))
+                Directory.Move(oldSubDirectory, subDirectory);
 
-            videoDirectory = subDirectory + "Videos.txt";
-
+            videoDirectory = Path.Combine(subDirectory, "Videos.txt");
+            string msg = "Created UHModz Directory!";
             if (!Directory.Exists(subDirectory))
             {
                 Directory.CreateDirectory(subDirectory);
-                MelonLogger.Log("Created UHModz Directory!");
+                MelonLogger.Msg(msg);
             }
 
             if (!File.Exists(videoDirectory))
@@ -159,28 +159,28 @@ namespace VideoLibrary
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
 
-            var openReadMe = new QMSingleButton(videoLibrary, 5, 0, "Read\nMe", delegate
+            var videoFromClipboard = new QMSingleButton(videoLibrary, 1, -2, "Video From\nClipboard", delegate
             {
-                Process.Start("https://github.com/UshioHiko/VRCVideoLibrary/blob/master/README.md");
-            }, "Opens a link to the mod's \"Read Me\"");
+                MelonCoroutines.Start(ModVideo.VideoFromClipboard(onCooldown));
+            }, "Puts the link in your system clipboard into the world's video player");
 
-            var openListButton = new QMSingleButton(videoLibrary, 5, -1, "Open\nLibrary\nDocument", delegate
+            var openListButton = new QMSingleButton(videoLibrary, 2, -2, "Open\nLibrary\nDocument", delegate
             {
                 OpenVideoLibrary();
             }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
 
-            var getLinkToggle = new QMToggleButton(videoLibrary, 6, 0, "Buttons Copy\nVideo Link", delegate
+            var openReadMe = new QMSingleButton(videoLibrary, 3, -2, "Read\nMe", delegate
+            {
+                Process.Start("https://github.com/UshioHiko/VRCVideoLibrary/blob/master/README.md");
+            }, "Opens a link to the mod's \"Read Me\"");
+
+            var getLinkToggle = new QMToggleButton(videoLibrary, 4, -2, "Buttons Copy\nVideo Link", delegate
             {
                 getLink = true;
             }, "Disabled", delegate
             {
                 getLink = false;
             }, "Makes video library buttons copy video url to your system clipboard", null, null, false, false);
-
-            var videoFromClipboard = new QMSingleButton(videoLibrary, 0, -1, "Video From\nClipboard", delegate
-            {
-                MelonCoroutines.Start(ModVideo.VideoFromClipboard(onCooldown));
-            }, "Puts the link in your system clipboard into the world's video player");
 
             for (int i = 0; i < videoList.Count; i++)
             {
@@ -424,26 +424,6 @@ namespace VideoLibrary
                 previousButton.setIntractable(false);
                 nextButton.setIntractable(false);
             }
-
-            if (vlAssetBundle == null) yield break;
-
-            var desktopScreenToggle = new QMToggleButton(videoLibrary, 1, -1, "Desktop\nScreen", delegate
-            {
-                try
-                {
-                    ToggleDesktopScreen(true);
-                }
-
-                catch { }
-            }, "Disabled", delegate
-            {
-                try
-                {
-                    ToggleDesktopScreen(false);
-                }
-
-                catch { }
-            }, "Toggles full screen if you're in desktop mode.");
         }
 
         public void GetVideoLibrary()
@@ -457,7 +437,7 @@ namespace VideoLibrary
             while ((line = file.ReadLine()) != null)
             {
                 var lineArray = line.Split('|');
-                videoList.Add(new ModVideo(lineArray[0], lineArray[1])); //{ VideoName = lineArray[0], VideoLink = lineArray[1] }
+                videoList.Add(new ModVideo(lineArray[0], lineArray[1]));
             }
 
             file.Close();
@@ -492,37 +472,6 @@ namespace VideoLibrary
             Process.Start(videoDirectory);
         }
 
-        public void ToggleDesktopScreen(bool active)
-        {
-            if (vlAssetBundle == null) return;
-            if (Player.prop_Player_0.field_Private_VRCPlayerApi_0.IsUserInVR()) return;
-
-            if (active)
-            {
-                if (desktopScreen != null) return;
-
-                var desktopScreenPrefab = vlAssetBundle.LoadAsset_Internal("Assets/VideoLibrary/DesktopScreenVL.prefab", UnhollowerRuntimeLib.Il2CppType.Of<GameObject>()).Cast<GameObject>();
-                desktopScreen = GameObject.Instantiate(desktopScreenPrefab, Player.prop_Player_0.transform, worldPositionStays: true);
-                desktopScreen.transform.localPosition = Vector3.zero;
-                desktopScreen.transform.localScale = new Vector3(35f, 35f, 35f);
-
-                var videoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>().field_Private_VideoPlayer_0 ?? GameObject.FindObjectOfType<VRC_SyncVideoPlayer>().GetComponentInChildren<UnityEngine.Video.VideoPlayer>() ?? GameObject.FindObjectOfType<VRCUnityVideoPlayer>().GetComponentInChildren<UnityEngine.Video.VideoPlayer>();
-
-                if (videoPlayer == null) return;
-                if (videoPlayer.renderMode != UnityEngine.Video.VideoRenderMode.RenderTexture) videoPlayer.renderMode = UnityEngine.Video.VideoRenderMode.RenderTexture;
-                if (videoPlayer.targetTexture == null) videoPlayer.targetTexture = desktopScreen.GetComponent<MeshRenderer>().material.GetTexture("_BMMScreen").Cast<RenderTexture>();
-                else desktopScreen.GetComponent<MeshRenderer>().material.SetTexture("_BMMScreen", videoPlayer.targetTexture);
-
-            }
-
-            else
-            {
-                if (desktopScreen == null) return;
-
-                GameObject.Destroy(desktopScreen);
-            }
-        }
-
         public IEnumerator CoolDown()
         {
             onCooldown = true;
@@ -530,38 +479,9 @@ namespace VideoLibrary
             onCooldown = false;
         }
 
-        public void GetAssetBundle()
-        {
-            try
-            {
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VRCVideoLibrary.videolibrary.vl"))
-                {
-                    if (stream == null) return;
-                    using (var tempStream = new MemoryStream((int)stream.Length))
-                    {
-                        if (stream != null)
-                        {
-                            stream.CopyTo(tempStream);
-
-                            vlAssetBundle = AssetBundle.LoadFromMemory_Internal(tempStream.ToArray(), 0);
-                            vlAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-                        }
-                    }
-                }
-
-            }
-
-            catch (Exception ex)
-            {
-                MelonLogger.LogError($"Error retrieving assetbundle...\n{ex}");
-            }
-        }
-
         public IEnumerator LoadIntervalToggle()
         {
             while (APIUser.CurrentUser == null) yield return null;
-
-            if (ModVideo.isOwner) yield break;
 
             var intervalToggle = new QMToggleButton(videoLibrary, 1, 0, "10 Seconds", delegate
             {
@@ -583,7 +503,6 @@ namespace VideoLibrary
             this.IndexNumber = indexNumber;
         }
 
-        public static bool isOwner => APIUser.CurrentUser.id != "usr_57026172-3b88-4299-aaa4-f8c4ee7612c9";
 
         public static bool waitIntervalToggle { get; set; } = false;
 
@@ -595,7 +514,10 @@ namespace VideoLibrary
         public int IndexNumber { get; set; }
         public QMSingleButton VideoButton { get; set; }
 
-        private static bool IsFriendsWith(string id) => APIUser.CurrentUser.friendIDs.Contains(id);
+        private static bool IsFriendsWith(string id)
+        {
+            return APIUser.CurrentUser.friendIDs.Contains(id);
+        }
 
         public int CompareTo(ModVideo other)
         {
@@ -731,7 +653,13 @@ namespace VideoLibrary
             return false;
         }
 
-        private static string InstanceCreatorId => RoomManager.field_Internal_Static_ApiWorldInstance_0.GetInstanceCreator();
+        private static string InstanceCreatorId
+        {
+            get
+            {
+                return RoomManager.field_Internal_Static_ApiWorldInstance_0.GetInstanceCreator();
+            }
+        }
 
         public static IEnumerator VideoFromClipboard(bool onCooldown)
         {
