@@ -503,11 +503,8 @@ namespace VideoLibrary
             this.IndexNumber = indexNumber;
         }
 
-
         public static bool waitIntervalToggle { get; set; } = false;
-
         public static int waitInterval => waitIntervalToggle ? 10 : 30;
-
         public string VideoName { get; set; }
         public string VideoLink { get; set; }
         public int VideoNumber { get; set; }
