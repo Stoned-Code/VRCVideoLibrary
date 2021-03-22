@@ -24,3 +24,9 @@ A VRChat mod that allows you to add buttons to your menu that puts videos on VRC
 ## Keep On Adding Video Links
 ![Mulitple Videos Text Example](https://cdn.discordapp.com/attachments/735644395436638219/758714302559158272/BigTextExample.png)
 ![Multiple Videos Example](https://cdn.discordapp.com/attachments/735644395436638219/758691645415096320/Big_Example.png)
+
+## Please Read!
+	I don't have a lot of time to update the mod. I'm still 
+learning how to program, and this was made as a side project.
+I have other projects I'm working on, and it isn't a 
+priority of mine to update this mod and add new features.
