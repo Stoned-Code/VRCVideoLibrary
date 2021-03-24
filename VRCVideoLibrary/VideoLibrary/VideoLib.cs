@@ -5,13 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
 using VRC.SDK3.Video.Components;
+using VRC.SDK3.Video.Components.Base;
 using VRCSDK2;
 
 namespace VideoLibrary
@@ -19,7 +19,7 @@ namespace VideoLibrary
     internal static class LibraryBuildInfo
     {
         public const string modName = "VRCVideoLibrary";
-        public const string modVersion = "1.1.2";
+        public const string modVersion = "1.1.5";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -198,7 +198,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -223,7 +223,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -248,7 +248,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -273,7 +273,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -298,7 +298,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -323,7 +323,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -348,7 +348,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -373,7 +373,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -398,7 +398,7 @@ namespace VideoLibrary
 
                                 else
                                 {
-                                    MelonCoroutines.Start(video.AddVideo(onCooldown));
+                                    video.AddVideo(onCooldown);
 
                                     if (!onCooldown)
                                     {
@@ -525,8 +525,13 @@ namespace VideoLibrary
         {
             VideoButton.DestroyMe();
         }
+        
+        public void AddVideo(bool onCooldown)
+        {
+            MelonCoroutines.Start(AddVid(onCooldown));
+        }
 
-        public IEnumerator AddVideo(bool onCooldown)
+        private IEnumerator AddVid(bool onCooldown)
         {
             var videoPlayerActive = VideoPlayerCheck();
             var isMaster = MasterCheck(APIUser.CurrentUser.id);
@@ -541,7 +546,7 @@ namespace VideoLibrary
                     {
                         var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
                         var syncVideoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>();
-                        var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
+                        var udonPlayer = GameObject.FindObjectOfType<BaseVRCVideoPlayer>();
 
                         VideoPlayerType playerType = VideoPlayerType.None;
 
@@ -564,13 +569,14 @@ namespace VideoLibrary
 
                         else if (playerType == VideoPlayerType.UdonPlayer)
                         {
-                            udonPlayer.videoURL.url = VideoLink;
+                            VRC.SDKBase.VRCUrl vrcUrl = new VRC.SDKBase.VRCUrl(VideoLink);
+                            udonPlayer.LoadURL(vrcUrl);
 
                             VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
                             yield return new WaitForSeconds(waitInterval);
 
-                            udonPlayer.PlayURL(udonPlayer.videoURL);
+                            udonPlayer.Play();
                         }
 
                         else if (playerType == VideoPlayerType.SyncPlayer)
@@ -670,7 +676,7 @@ namespace VideoLibrary
                     if (!onCooldown)
                     {
                         var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
-                        var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
+                        var udonPlayer = GameObject.FindObjectOfType<BaseVRCVideoPlayer>();
 
                         VideoPlayerType playerType = VideoPlayerType.None;
 
@@ -691,13 +697,14 @@ namespace VideoLibrary
 
                         else if (playerType == VideoPlayerType.UdonPlayer)
                         {
-                            udonPlayer.videoURL.url = System.Windows.Forms.Clipboard.GetText();
+                            VRC.SDKBase.VRCUrl vrcUrl = new VRC.SDKBase.VRCUrl(System.Windows.Forms.Clipboard.GetText());
+                            udonPlayer.LoadURL(vrcUrl);
 
                             VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
 
                             yield return new WaitForSeconds(waitInterval);
 
-                            udonPlayer.LoadURL(udonPlayer.videoURL);
+                            udonPlayer.Play(); // Check back
                         }
                     }
 
