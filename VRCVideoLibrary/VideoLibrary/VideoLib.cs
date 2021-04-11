@@ -19,7 +19,7 @@ namespace VideoLibrary
     internal static class LibraryBuildInfo
     {
         public const string modName = "VRCVideoLibrary";
-        public const string modVersion = "1.1.5";
+        public const string modVersion = "1.1.6";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
