@@ -1,4 +1,7 @@
-﻿using MelonLoader;
+﻿/*
+ * 
+ */
+using MelonLoader;
 using RubyButtonAPI;
 using System;
 using System.Collections;
@@ -19,7 +22,7 @@ namespace VideoLibrary
     internal static class LibraryBuildInfo
     {
         public const string modName = "VRCVideoLibrary";
-        public const string modVersion = "1.1.6";
+        public const string modVersion = "1.1.7";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -580,7 +583,7 @@ namespace VideoLibrary
                 foreach (Player player in playerList)
                 {
                     var playerApi = player.prop_VRCPlayerApi_0;
-                    var apiUser = player.field_Private_APIUser_0;
+                    var apiUser = player.prop_APIUser_0;
 
                     if (playerApi.isMaster)
                     {
@@ -603,10 +606,10 @@ namespace VideoLibrary
                 for (int i = 0; i < playerManager.Length; i++)
                 {
                     var player = playerManager[i];
-                    var apiUser = player.field_Private_APIUser_0;
+                    var apiUser = player.prop_APIUser_0;
                     var isFriends = IsFriendsWith(apiUser.id);
 
-                    if (!player.field_Private_VRCPlayerApi_0.isMaster) continue;
+                    if (!player.prop_VRCPlayerApi_0.isMaster) continue;
                     if (isFriends) return true;
                 }
 
