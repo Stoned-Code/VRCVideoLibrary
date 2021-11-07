@@ -2,18 +2,21 @@
  * 
  */
 using MelonLoader;
+using Mono.Cecil;
 using RubyButtonAPI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
 using VRC.SDK3.Video.Components;
+using VRC.SDK3.Video.Components.AVPro;
 using VRC.SDK3.Video.Components.Base;
 using VRCSDK2;
 
@@ -22,7 +25,7 @@ namespace VideoLibrary
     internal static class LibraryBuildInfo
     {
         public const string modName = "VRCVideoLibrary";
-        public const string modVersion = "1.1.7";
+        public const string modVersion = "1.2.0";
         public const string modAuthor = "UHModz";
         public const string modDownload = "https://github.com/UshioHiko/VRCVideoLibrary/releases";
     }
@@ -46,6 +49,10 @@ namespace VideoLibrary
         private QMSingleButton nextButton;
 
         private QMSingleButton indexButton;
+        private HarmonyLib.Harmony hInstance;
+
+        private static string modPath = Path.Combine(Environment.CurrentDirectory, "Mods", "MoonriseV2.dll");
+
 
         //////////////////////
         //  VRChat Methods  //
@@ -53,22 +60,21 @@ namespace VideoLibrary
 
         public override void OnApplicationStart()
         {
+            ExpansionKitApi.OnUiManagerInit += OnUiManagerInit;
             videoList = new List<ModVideo>();
             MelonCoroutines.Start(InitializeLibrary());
+            MelonCoroutines.Start(LoadMenu());
+
+            hInstance = new HarmonyLib.Harmony("com.StonedCode.VRCVideoLibrary");
+            hInstance.PatchAll();
         }
 
-        public override void VRChat_OnUiManagerInit()
+        private void OnUiManagerInit()
         {
-            videoLibrary = new QMNestedButton("ShortcutMenu", -10, 0, "", "", null, null, null, null);
-            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Image>().enabled = false;
-            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Text>().enabled = false;
-            
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Video\nLibrary", delegate
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Video\nLibrary", () =>
             {
-                videoLibrary.getMainButton().getGameObject().GetComponent<Button>().onClick.Invoke();
+                videoLibrary.getMainButton().getGameObject().GetComponent<Button>().onClick?.Invoke();
             });
-
-            MelonCoroutines.Start(LoadMenu());
         }
 
         ///////////////////////
@@ -83,13 +89,7 @@ namespace VideoLibrary
             string exampleVideo = "Example Name|https://youtu.be/pKO9UjSeLew";
 
             var rootDirectory = Environment.CurrentDirectory;
-            var oldSubDirectory = Path.Combine(rootDirectory, "UHModz"); // Remove in future.
             var subDirectory = Path.Combine(rootDirectory, "UserData", "UHModz");
-
-            
-            // Remove in future.
-            if (Directory.Exists(oldSubDirectory))
-                Directory.Move(oldSubDirectory, subDirectory);
 
             videoDirectory = Path.Combine(subDirectory, "Videos.txt");
             string msg = "Created UHModz Directory!";
@@ -115,12 +115,19 @@ namespace VideoLibrary
 
         private IEnumerator LoadMenu()
         {
+
             while (!libraryInitialized) yield return null;
+            while (APIUser.CurrentUser == null) yield return null;
+
+            videoLibrary = new QMNestedButton("ShortcutMenu", 5, -1, "", "", null, null, null, null);
+            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Image>().enabled = false;
+            videoLibrary.getMainButton().getGameObject().GetComponentInChildren<Text>().enabled = false;
+
             indexButton = new QMSingleButton(videoLibrary, 4, 1, "Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString(), delegate { }, "", Color.clear, Color.yellow);
             indexButton.getGameObject().GetComponentInChildren<Button>().enabled = false;
             indexButton.getGameObject().GetComponentInChildren<Image>().enabled = false;
 
-            previousButton = new QMSingleButton(videoLibrary, 4, 0, "Previous\nPage", delegate
+            previousButton = new QMSingleButton(videoLibrary, 4, 0, "", () =>
             {
                 if (currentMenuIndex != 0)
                 {
@@ -141,8 +148,9 @@ namespace VideoLibrary
                 }
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
+            MakeArrowButton(previousButton, ArrowDirection.Up);
 
-            nextButton = new QMSingleButton(videoLibrary, 4, 2, "Next\nPage", delegate
+            nextButton = new QMSingleButton(videoLibrary, 4, 2, "", () =>
             {
                 if (currentMenuIndex != indexNumber)
                 {
@@ -163,31 +171,31 @@ namespace VideoLibrary
                 }
                 indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
             }, "Previous video page", null, null);
-
-            var videoFromClipboard = new QMSingleButton(videoLibrary, 1, -2, "Video From\nClipboard", delegate
+            MakeArrowButton(nextButton, ArrowDirection.Down);
+            var videoFromClipboard = new QMSingleButton(videoLibrary, 1, -2, "Video From\nClipboard", () =>
             {
                 MelonCoroutines.Start(ModVideo.VideoFromClipboard(onCooldown));
             }, "Puts the link in your system clipboard into the world's video player");
 
-            var openListButton = new QMSingleButton(videoLibrary, 2, -2, "Open\nLibrary\nDocument", delegate
+            var openListButton = new QMSingleButton(videoLibrary, 2, -2, "Open\nLibrary\nDocument", () =>
             {
                 OpenVideoLibrary();
             }, "Opens the Video Library text document\nLibrary Format: \"Button Name|Video Url\"", null, null);
 
-            var openReadMe = new QMSingleButton(videoLibrary, 3, -2, "Read\nMe", delegate
+            var openReadMe = new QMSingleButton(videoLibrary, 3, -2, "Read\nMe", () =>
             {
                 Process.Start("https://github.com/UshioHiko/VRCVideoLibrary/blob/master/README.md");
             }, "Opens a link to the mod's \"Read Me\"");
 
-            var getLinkToggle = new QMToggleButton(videoLibrary, 4, -2, "Buttons Copy\nVideo Link", delegate
+            var getLinkToggle = new QMToggleButton(videoLibrary, 4, -2, "Buttons Copy\nVideo Link", () =>
             {
                 getLink = true;
-            }, "Disabled", delegate
+            }, "Disabled", () =>
             {
                 getLink = false;
             }, "Makes video library buttons copy video url to your system clipboard", null, null, false, false);
 
-            var refreshList = new QMSingleButton(videoLibrary, 5, -2, "Refresh\nList", delegate
+            var refreshList = new QMSingleButton(videoLibrary, 5, -2, "Refresh\nList", () =>
             {
                 DeleteButtons();
                 ClearButtons();
@@ -195,13 +203,13 @@ namespace VideoLibrary
                 BuildList();
             }, "Refreshes the list");
 
-            BuildList();
-
             if (videoList.Count <= 9)
             {
                 previousButton.setIntractable(false);
                 nextButton.setIntractable(false);
             }
+
+            BuildList();
         }
 
         public void OpenVideoLibrary()
@@ -214,19 +222,6 @@ namespace VideoLibrary
             onCooldown = true;
             yield return new WaitForSeconds(30);
             onCooldown = false;
-        }
-
-        public IEnumerator LoadIntervalToggle()
-        {
-            while (APIUser.CurrentUser == null) yield return null;
-
-            var intervalToggle = new QMToggleButton(videoLibrary, 1, 0, "10 Seconds", delegate
-            {
-                ModVideo.waitIntervalToggle = true;
-            }, "30 Seconds", delegate
-            {
-                ModVideo.waitIntervalToggle = false;
-            }, "Changes cooldown interval.", null, null, false, ModVideo.waitIntervalToggle);
         }
 
         public void DeleteButtons()
@@ -290,11 +285,12 @@ namespace VideoLibrary
             for (int i = 0; i < videoList.Count; i++)
             {
                 ModVideo video = videoList[i];
+
                 switch (video.VideoNumber)
                 {
                     case 0:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 0, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -319,7 +315,7 @@ namespace VideoLibrary
 
                     case 1:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 0, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -344,7 +340,7 @@ namespace VideoLibrary
 
                     case 2:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 0, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -369,7 +365,7 @@ namespace VideoLibrary
 
                     case 3:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 1, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -394,7 +390,7 @@ namespace VideoLibrary
 
                     case 4:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 1, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -419,7 +415,7 @@ namespace VideoLibrary
 
                     case 5:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 1, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -444,7 +440,7 @@ namespace VideoLibrary
 
                     case 6:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 1, 2, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -469,7 +465,7 @@ namespace VideoLibrary
 
                     case 7:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 2, 2, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -494,7 +490,7 @@ namespace VideoLibrary
 
                     case 8:
                         {
-                            var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, delegate
+                            var vidButton = new QMSingleButton(videoLibrary, 3, 2, video.VideoName, () =>
                             {
                                 if (getLink)
                                 {
@@ -516,6 +512,7 @@ namespace VideoLibrary
                             vidButton.getGameObject().GetComponentInChildren<Text>().resizeTextForBestFit = true;
                             break;
                         }
+                    
                 }
 
                 if (video.IndexNumber != currentMenuIndex)
@@ -526,236 +523,48 @@ namespace VideoLibrary
 
             indexButton.setButtonText("Page:\n" + (currentMenuIndex + 1).ToString() + " of " + (indexNumber + 1).ToString());
         }
-    }
 
-    public class ModVideo : IComparable<ModVideo>
-    {
-        public ModVideo(string videoName, string videoLink, int videoNumber = 0, int indexNumber = 0)
+        /// <summary>
+        /// Turns a QMSingleButton into an arrow button.
+        /// </summary>
+        /// <param name="qmSingleButton">QMSingleButton you want to turn into an arrow.</param>
+        /// <param name="arrowDirection">Direction you want the arrow to point.</param>
+        public static void MakeArrowButton(QMSingleButton qmSingleButton, ArrowDirection arrowDirection)
         {
-            this.VideoName = videoName;
-            this.VideoLink = videoLink;
-            this.VideoNumber = videoNumber;
-            this.IndexNumber = indexNumber;
-        }
-
-        public static bool waitIntervalToggle { get; set; } = false;
-        public static int waitInterval => waitIntervalToggle ? 10 : 30;
-        public string VideoName { get; set; }
-        public string VideoLink { get; set; }
-        public int VideoNumber { get; set; }
-        public int IndexNumber { get; set; }
-        public QMSingleButton VideoButton { get; set; }
-        static bool videoPlayerActive
-        {
-            get
+            var arrowSprite = QuickMenu.prop_QuickMenu_0.transform.Find("QuickMenu_NewElements/_CONTEXT/QM_Context_User_Selected/NextArrow_Button").GetComponentInChildren<Image>().sprite;
+            if (arrowDirection == ArrowDirection.Up)
             {
-                bool videoPlayerActive;
-                try
-                {
-                    var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
-                    var syncVideoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>();
-                    var udonPlayer = GameObject.FindObjectOfType<VRCUnityVideoPlayer>();
-
-                    if (videoPlayer != null || udonPlayer != null || syncVideoPlayer != null)
-                    {
-                        return true;
-                    }
-
-                    else
-                    {
-                        return false;
-                    }
-                }
-
-                catch (Exception)
-                {
-                    videoPlayerActive = false;
-                    return videoPlayerActive;
-                }
-            }
-        }
-        static bool isMaster
-        {
-            get
-            {
-                var playerList = PlayerManager.field_Private_Static_PlayerManager_0.field_Private_List_1_Player_0;
-
-                foreach (Player player in playerList)
-                {
-                    var playerApi = player.prop_VRCPlayerApi_0;
-                    var apiUser = player.prop_APIUser_0;
-
-                    if (playerApi.isMaster)
-                    {
-                        if (apiUser.id == APIUser.CurrentUser.id)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-        }
-        static bool friendsWithMaster
-        {
-            get
-            {
-                var playerManager = PlayerManager.field_Private_Static_PlayerManager_0.prop_ArrayOf_Player_0;
-
-                for (int i = 0; i < playerManager.Length; i++)
-                {
-                    var player = playerManager[i];
-                    var apiUser = player.prop_APIUser_0;
-                    var isFriends = IsFriendsWith(apiUser.id);
-
-                    if (!player.prop_VRCPlayerApi_0.isMaster) continue;
-                    if (isFriends) return true;
-                }
-
-                return false;
-            }
-        }
-        private static bool IsFriendsWith(string id)
-        {
-            return APIUser.CurrentUser.friendIDs.Contains(id);
-        }
-
-        public int CompareTo(ModVideo other)
-        {
-            return this.VideoName.CompareTo(other.VideoName);
-        }
-
-        public void DestroyButton()
-        {
-            VideoButton.DestroyMe();
-        }
-        
-        public void AddVideo(bool onCooldown)
-        {
-            MelonCoroutines.Start(AddVid(onCooldown));
-        }
-
-        private IEnumerator AddVid(bool onCooldown)
-        {
-            var friendsWithCreator = IsFriendsWith(InstanceCreatorId);
-
-            if (videoPlayerActive)
-            {
-                if (isMaster || friendsWithCreator || friendsWithMaster || APIUser.CurrentUser.id == InstanceCreatorId)
-                {
-                    if (!onCooldown)
-                    {
-                        var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
-                        var syncVideoPlayer = GameObject.FindObjectOfType<SyncVideoPlayer>();
-
-                        VideoPlayerType playerType = VideoPlayerType.None;
-
-                        if (videoPlayer != null) playerType = VideoPlayerType.ClassicPlayer;
-                        else if (syncVideoPlayer != null) playerType = VideoPlayerType.SyncPlayer;
-
-
-                        if (playerType == VideoPlayerType.ClassicPlayer)
-                        {
-                            videoPlayer.Clear();
-                            videoPlayer.AddURL(VideoLink);
-
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
-
-                            yield return new WaitForSeconds(waitInterval);
-
-                            videoPlayer.Next();
-                        }
-
-                        else if (playerType == VideoPlayerType.SyncPlayer)
-                        {
-                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.Clear();
-                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.AddURL(VideoLink);
-
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
-                            yield return new WaitForSeconds(waitInterval);
-
-                            syncVideoPlayer.field_Private_VRC_SyncVideoPlayer_0.Next();
-                        }
-                    }
-
-                    else
-                    {
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Video Library is on {waitInterval} second cooldown");
-                    }
-                }
-
-                else
-                {
-                    VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master and their friends can set videos...");
-                }
+                qmSingleButton.getGameObject().GetComponentInChildren<Image>().sprite = arrowSprite;
+                qmSingleButton.getGameObject().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, 90));
+                qmSingleButton.getGameObject().GetComponentInChildren<Text>().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, -90));
             }
 
-            else
-                VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("No active video player...");
-        }
-
-        public void GetLink()
-        {
-            System.Windows.Forms.Clipboard.SetText(VideoLink);
-            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Video link copied to system clipboard");
-        }
-
-        private static string InstanceCreatorId
-        {
-            get
+            else if (arrowDirection == ArrowDirection.Down)
             {
-                return RoomManager.field_Internal_Static_ApiWorldInstance_0.GetInstanceCreator();
+                qmSingleButton.getGameObject().GetComponentInChildren<Image>().sprite = arrowSprite;
+                qmSingleButton.getGameObject().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, -90));
+                qmSingleButton.getGameObject().GetComponentInChildren<Text>().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, 90));
+            }
+
+            else if (arrowDirection == ArrowDirection.Left)
+            {
+                qmSingleButton.getGameObject().GetComponentInChildren<Image>().sprite = arrowSprite;
+                qmSingleButton.getGameObject().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, 180));
+                qmSingleButton.getGameObject().GetComponentInChildren<Text>().GetComponent<RectTransform>().localRotation = Quaternion.Euler(new Vector3(0, 0, -180));
+            }
+
+            else if (arrowDirection == ArrowDirection.Right)
+            {
+                qmSingleButton.getGameObject().GetComponentInChildren<Image>().sprite = arrowSprite;
             }
         }
 
-        public static IEnumerator VideoFromClipboard(bool onCooldown)
+        public enum ArrowDirection
         {
-
-            if (videoPlayerActive)
-            {
-                if (isMaster)
-                {
-                    if (!onCooldown)
-                    {
-                        var videoPlayer = GameObject.FindObjectOfType<VRC_SyncVideoPlayer>();
-
-                        VideoPlayerType playerType = VideoPlayerType.None;
-
-                        if (videoPlayer != null) playerType = VideoPlayerType.ClassicPlayer;
-
-                        if (playerType == VideoPlayerType.ClassicPlayer)
-                        {
-                            videoPlayer.Clear();
-                            videoPlayer.AddURL(System.Windows.Forms.Clipboard.GetText());
-
-                            VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Wait {waitInterval} seconds\nfor video to play");
-
-                            yield return new WaitForSeconds(waitInterval);
-
-                            videoPlayer.Next();
-                        }
-                    }
-
-                    else
-                    {
-                        VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add($"Video Library is on {waitInterval} second cooldown");
-                    }
-                }
-
-                else
-                {
-                    VRCUiManager.prop_VRCUiManager_0.field_Private_List_1_String_0.Add("Only the master can set videos...");
-                }
-            }
-        }
-
-        public enum VideoPlayerType
-        {
-            UdonPlayer,
-            ClassicPlayer,
-            None,
-            SyncPlayer
+            Up,
+            Down,
+            Left,
+            Right
         }
     }
 }

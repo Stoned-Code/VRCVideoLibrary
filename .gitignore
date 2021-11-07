@@ -10,4 +10,4 @@ ModID.txt
 /VRCVideoLibrary/obj/*
 /VRCVideoLibrary/.vs/
 debug.log
-
+modInfo.json
