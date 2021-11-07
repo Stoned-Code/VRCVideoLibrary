@@ -6,8 +6,8 @@ VRCVideoLibrary/VideoLibrary/RubyButtonAPI.cs
 VRCVideoLibrary/VideoLibrary/bin/Debug/VRCVideoLibrary.pdb
 BigTextExample.png
 ModID.txt
-/VRCVideoLibrary/bin/*
-/VRCVideoLibrary/obj/*
+/VRCVideoLibrary/VideoLibrary/bin/
+/VRCVideoLibrary/VideoLibrary/obj/
 /VRCVideoLibrary/.vs/
 debug.log
 modInfo.json
